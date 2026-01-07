@@ -1,0 +1,102 @@
+{% extends "hello/layout.html" %}
+
+{% block title %}Air Quality Dashboard{% endblock %}
+
+{% block content %}
+<h1>Air Quality Dashboard</h1>
+
+<div class="dashboard-grid">
+    <!-- Cards for latest readings -->
+    <div class="card">
+        <h2>PM1</h2>
+        <p id="pm1-card">0</p>
+    </div>
+    <div class="card">
+        <h2>PM2.5</h2>
+        <p id="pm25-card">0</p>
+    </div>
+    <div class="card">
+        <h2>PM10</h2>
+        <p id="pm10-card">0</p>
+    </div>
+</div>
+
+<div class="chart-container">
+    <canvas id="pmChart" width="800" height="300"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const pm1Card = document.getElementById('pm1-card');
+const pm25Card = document.getElementById('pm25-card');
+const pm10Card = document.getElementById('pm10-card');
+const ctx = document.getElementById('pmChart').getContext('2d');
+
+let pmChart = null;
+const maxPoints = 50;  // Maximum number of points to show on the chart
+
+function fetchData() {
+    fetch('/api/latest-readings/')
+        .then(response => response.json())
+        .then(data => {
+            if(data.length === 0) return;
+
+            const latest = data[0];
+            pm1Card.textContent = latest.pm1;
+            pm25Card.textContent = latest.pm25;
+            pm10Card.textContent = latest.pm10;
+
+            const label = new Date(latest.timestamp).toLocaleTimeString();
+            const pm1Val = latest.pm1;
+            const pm25Val = latest.pm25;
+            const pm10Val = latest.pm10;
+
+            if(pmChart){
+                // Push new points
+                pmChart.data.labels.push(label);
+                pmChart.data.datasets[0].data.push(pm1Val);
+                pmChart.data.datasets[1].data.push(pm25Val);
+                pmChart.data.datasets[2].data.push(pm10Val);
+
+                // Keep the number of points limited
+                if(pmChart.data.labels.length > maxPoints){
+                    pmChart.data.labels.shift();
+                    pmChart.data.datasets[0].data.shift();
+                    pmChart.data.datasets[1].data.shift();
+                    pmChart.data.datasets[2].data.shift();
+                }
+
+                pmChart.update();
+            } else {
+                // Create chart first time
+                pmChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [label],
+                        datasets: [
+                            { label: 'PM1', data: [pm1Val], borderColor: 'blue', fill: false, tension: 0.3 },
+                            { label: 'PM2.5', data: [pm25Val], borderColor: 'green', fill: false, tension: 0.3 },
+                            { label: 'PM10', data: [pm10Val], borderColor: 'red', fill: false, tension: 0.3 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top' } },
+                        animation: { duration: 0 },  // disable animation for live update
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching readings:', error));
+}
+
+// Fetch immediately and then every 5 seconds
+fetchData();
+setInterval(fetchData, 5000);
+</script>
+
+{% endblock %}
