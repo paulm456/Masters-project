@@ -3,15 +3,6 @@ from django.http import HttpResponse
 from django.contrib import admin
 from .models import SensorReading
 
-# Register your models here.
-@admin.register(SensorReading)
-class SensorReadingAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'pm1', 'pm25', 'pm10')
-    list_filter = ('timestamp',)
-    ordering = ('-timestamp',)
-    actions = [export_as_csv]
-
-
 def export_as_csv(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=sensor_readings.csv'
@@ -34,6 +25,15 @@ def export_as_csv(modeladmin, request, queryset):
 
 
     return response
+
+# Register your models here.
+@admin.register(SensorReading)
+class SensorReadingAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'pm1', 'pm25', 'pm10')
+    list_filter = ('timestamp',)
+    ordering = ('-timestamp',)
+    actions = [export_as_csv]
+
 
 
 export_as_csv.short_description = "Export selected rows as CSV"
