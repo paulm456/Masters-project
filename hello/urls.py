@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from hello.models import LogMessage
-from views import receive_location, latest_location
+from .views import receive_location, latest_location
 from django.views.generic import TemplateView
 
 
