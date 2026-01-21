@@ -8,7 +8,7 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 import random, datetime, json, sys
 from django.views.decorators.csrf import csrf_exempt
-from .models import SensorReading
+from .models import SensorReading, PhoneLocation
 
 
 
@@ -111,3 +111,32 @@ def latest_readings(request):
         for r in latest
     ]
     return JsonResponse(data, safe=False)
+
+
+# View to receive phone GPS location data
+@csrf_exempt
+def receive_location(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        PhoneLocation.objects.create(
+            latitude=data["latitude"],
+            longitude=data["longitude"]
+        )
+
+        return JsonResponse({"status": "ok"})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+# View to get the latest phone location
+def latest_location(request):
+    location = PhoneLocation.objects.last()
+
+    if not location:
+        return JsonResponse({"error": "No location yet"}, status=404)
+
+    return JsonResponse({
+        "latitude": location.latitude,
+        "longitude": location.longitude,
+        "timestamp": location.timestamp
+    })

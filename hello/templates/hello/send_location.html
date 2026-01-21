@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Location</title>
+</head>
+<body>
+    <h2>Send Phone Location</h2>
+    <button onclick="sendLocation()">Send Location</button>
+    <p id="status"></p>
+
+    <script>
+        function sendLocation() {
+            navigator.geolocation.getCurrentPosition(position => {
+                fetch("/api/location/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    })
+                })
+                .then(() => {
+                    document.getElementById("status").innerText = "Location sent!";
+                });
+            });
+        }
+    </script>
+</body>
+</html>

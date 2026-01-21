@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from hello.models import LogMessage
+from views import receive_location, latest_location
+from django.views.generic import TemplateView
 
 
 home_list_view = views.HomeListView.as_view(
@@ -18,7 +20,8 @@ urlpatterns = [
     path("api/sensor/", views.sensor_data, name="sensor_data"),
     path("log/", views.log_message, name="log"),
     path('api/latest-readings/', views.latest_readings, name='latest_readings'),
-
-
+    path("api/location/", receive_location, name="receive_location"),
+    path("api/location/latest/", latest_location, name="latest_location"),
+    path("send-location/", TemplateView.as_view(template_name="hello/send_location.html")),
 ]
 

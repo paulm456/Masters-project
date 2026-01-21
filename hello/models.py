@@ -22,3 +22,12 @@ class SensorReading(models.Model):
 
     def __str__(self):
         return f"PM1: {self.pm1}, PM2.5: {self.pm25}, PM10: {self.pm10} @ {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
+# Location model to store phone GPS data
+class PhoneLocation(models.Model):
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.latitude}, {self.longitude}"

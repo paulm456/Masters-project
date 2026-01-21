@@ -24,9 +24,17 @@
 <div class="chart-container">
     <canvas id="pmChart" width="800" height="300"></canvas>
 </div>
+
+<div class="map-container">
+    <h2>Sensor Location</h2>
+    <div id="map" style="height: 400px;"></div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -97,6 +105,36 @@ function fetchData() {
 // Fetch immediately and then every 5 seconds
 fetchData();
 setInterval(fetchData, 5000);
+
+
+
+// Initialize map
+let map = L.map('map').setView([53.35, -6.26], 13);
+let marker = null;
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+function updateMap() {
+    fetch('/api/location/latest/')
+        .then(res => res.json())
+        .then(data => {
+            const lat = data.latitude;
+            const lon = data.longitude;
+
+            if (!marker) {
+                marker = L.marker([lat, lon]).addTo(map);
+            } else {
+                marker.setLatLng([lat, lon]);
+            }
+
+            map.setView([lat, lon], 15);
+        });
+}
+
+updateMap();
+setInterval(updateMap, 5000);
 </script>
 
 {% endblock %}
