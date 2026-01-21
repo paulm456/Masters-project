@@ -22,6 +22,6 @@ urlpatterns = [
     path('api/latest-readings/', views.latest_readings, name='latest_readings'),
     path("api/location/", receive_location, name="receive_location"),
     path("api/location/latest/", latest_location, name="latest_location"),
-    path("send-location/", TemplateView.as_view(template_name="hello/send_location.html")),
+    path("send-location/", TemplateView.as_view(template_name="hello/send_location.html"), name="send_location"),
 ]
 
